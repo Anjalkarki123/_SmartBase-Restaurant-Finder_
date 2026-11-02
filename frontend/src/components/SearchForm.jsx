@@ -1,21 +1,13 @@
 import { useRef, useState } from 'react';
-import { CUISINES, CITIES, cityLabel, PRICE_UNIT, PRICE_SETTINGS } from '../config.js';
+import { cityLabel } from '../config.js';
 
 const EMPTY_FORM = { cuisine: '', cityKey: '', maxPrice: '', minRating: '0' };
-const price = PRICE_SETTINGS[PRICE_UNIT];
 
 // Returns an object of error messages; empty object = form is valid.
-function validate(form) {
+function validate(form, options) {
   const errors = {};
-  if (!form.cuisine) errors.cuisine = 'Choose a cuisine.';
-  if (!form.cityKey) errors.cityKey = 'Choose a city.';
-
-  if (form.maxPrice !== '') {
-    const value = Number(form.maxPrice);
-    if (Number.isNaN(value)) errors.maxPrice = 'Enter a number.';
-    else if (value < price.min || value > price.max) errors.maxPrice = `Enter a value from ${price.min} to ${price.max}.`;
-    else if (PRICE_UNIT === 'level' && !Number.isInteger(value)) errors.maxPrice = 'Enter a whole number.';
-  }
+  if (!options.cuisines.includes(form.cuisine)) errors.cuisine = 'Choose a cuisine.';
+  if (!options.cities.some((city) => cityLabel(city) === form.cityKey)) errors.cityKey = 'Choose a city.';
 
   const rating = Number(form.minRating);
   if (form.minRating === '' || Number.isNaN(rating)) errors.minRating = 'Enter a rating from 0 to 5.';
@@ -24,10 +16,17 @@ function validate(form) {
   return errors;
 }
 
-export default function SearchForm({ loading, onSearch, onReset }) {
+export default function SearchForm({
+  loading,
+  options,
+  optionsLoading,
+  optionsError,
+  onSearch,
+  onReset,
+}) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const fieldRefs = { cuisine: useRef(), cityKey: useRef(), maxPrice: useRef(), minRating: useRef() };
+  const fieldRefs = { cuisine: useRef(), cityKey: useRef(), minRating: useRef() };
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -36,19 +35,20 @@ export default function SearchForm({ loading, onSearch, onReset }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const found = validate(form);
+    if (optionsLoading) return;
+    const found = validate(form, options);
     setErrors(found);
     const firstInvalid = Object.keys(fieldRefs).find((key) => found[key]);
     if (firstInvalid) {
       fieldRefs[firstInvalid].current.focus(); // take keyboard users to the problem
       return;
     }
-    const city = CITIES.find((c) => cityLabel(c) === form.cityKey);
+    const city = options.cities.find((c) => cityLabel(c) === form.cityKey);
     onSearch({
       cuisine: form.cuisine,
       city: city.city,
       state: city.state,
-      maxPrice: form.maxPrice,
+      maxPrice: form.maxPrice === '' ? '' : Number(form.maxPrice),
       minRating: form.minRating,
     });
   }
@@ -71,9 +71,10 @@ export default function SearchForm({ loading, onSearch, onReset }) {
         <div className="field">
           <label htmlFor="cuisine">Cuisine</label>
           <select id="cuisine" ref={fieldRefs.cuisine} value={form.cuisine}
-            onChange={(e) => update('cuisine', e.target.value)} {...errorProps('cuisine')}>
-            <option value="">Choose a cuisine</option>
-            {CUISINES.map((c) => <option key={c} value={c}>{c}</option>)}
+            onChange={(e) => update('cuisine', e.target.value)} disabled={optionsLoading}
+            {...errorProps('cuisine')}>
+            <option value="">{optionsLoading ? 'Loading options…' : 'Choose a cuisine'}</option>
+            {options.cuisines.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           {errors.cuisine && <p className="field-error" id="cuisine-error">{errors.cuisine}</p>}
         </div>
@@ -81,22 +82,23 @@ export default function SearchForm({ loading, onSearch, onReset }) {
         <div className="field">
           <label htmlFor="city">City</label>
           <select id="city" ref={fieldRefs.cityKey} value={form.cityKey}
-            onChange={(e) => update('cityKey', e.target.value)} {...errorProps('cityKey')}>
-            <option value="">Choose a city</option>
-            {CITIES.map((c) => <option key={cityLabel(c)} value={cityLabel(c)}>{cityLabel(c)}</option>)}
+            onChange={(e) => update('cityKey', e.target.value)} disabled={optionsLoading}
+            {...errorProps('cityKey')}>
+            <option value="">{optionsLoading ? 'Loading options…' : 'Choose a city'}</option>
+            {options.cities.map((c) => <option key={cityLabel(c)} value={cityLabel(c)}>{cityLabel(c)}</option>)}
           </select>
           {errors.cityKey && <p className="field-error" id="cityKey-error">{errors.cityKey}</p>}
         </div>
 
         <div className="field">
-          <label htmlFor="maxPrice">{price.label}</label>
-          <input id="maxPrice" ref={fieldRefs.maxPrice} type="number" inputMode="numeric"
-            min={price.min} max={price.max} step={price.step} placeholder="Any price"
-            value={form.maxPrice} onChange={(e) => update('maxPrice', e.target.value)}
-            {...errorProps('maxPrice')} />
-          {errors.maxPrice
-            ? <p className="field-error" id="maxPrice-error">{errors.maxPrice}</p>
-            : <p className="field-help">{price.help}. Leave empty for any price.</p>}
+          <label htmlFor="maxPrice">Maximum price</label>
+          <select id="maxPrice" value={form.maxPrice}
+            onChange={(e) => update('maxPrice', e.target.value)}>
+            <option value="">Any price</option>
+            <option value="1">Low</option>
+            <option value="2">Moderate</option>
+            <option value="3">High</option>
+          </select>
         </div>
 
         <div className="field">
@@ -108,11 +110,17 @@ export default function SearchForm({ loading, onSearch, onReset }) {
         </div>
       </div>
 
+      {optionsError && (
+        <p className="field-help" role="status">
+          Cuisine and city options could not be loaded. Using sample options.
+        </p>
+      )}
+
       <div className="form-actions">
-        <button type="submit" className="button button-primary" disabled={loading}>
+        <button type="submit" className="button button-primary" disabled={loading || optionsLoading}>
           {loading ? 'Searching…' : 'Search'}
         </button>
-        <button type="button" className="button" onClick={handleReset} disabled={loading}>
+        <button type="button" className="button" onClick={handleReset} disabled={loading || optionsLoading}>
           Reset
         </button>
       </div>

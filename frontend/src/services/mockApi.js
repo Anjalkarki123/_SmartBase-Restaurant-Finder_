@@ -7,7 +7,7 @@
  * The real ranking (distance functions and the cuisine TAH) belongs to the
  * backend. Do not copy this logic into production.
  */
-import { formatPrice, formatRating } from '../config.js';
+import { FALLBACK_CITIES, FALLBACK_CUISINES, formatPrice, formatRating } from '../config.js';
 
 // Set to true to test the error message and Retry button.
 const SIMULATE_ERROR = false;
@@ -21,15 +21,19 @@ const CUISINE_FAMILY = {
 };
 
 const MOCK_RESTAURANTS = [
-  { id: 1, name: 'Pho Corner (sample)', cuisine: 'Vietnamese', city: 'Moscow', state: 'ID', price: 1, rating: 4.0, diningOption: 'Carryout' },
-  { id: 2, name: 'Seoul Kitchen (sample)', cuisine: 'Korean', city: 'Moscow', state: 'ID', price: 2, rating: 4.5, diningOption: 'Dine-in and carryout' },
-  { id: 3, name: 'Saigon Table (sample)', cuisine: 'Vietnamese', city: 'Pullman', state: 'WA', price: 2, rating: 5.0, diningOption: 'Dine-in and carryout' },
-  { id: 4, name: 'Golden Wok (sample)', cuisine: 'Chinese', city: 'Moscow', state: 'ID', price: 2, rating: 4.0, diningOption: 'Dine-in' },
-  { id: 5, name: 'Spice Route (sample)', cuisine: 'Indian', city: 'Pullman', state: 'WA', price: 2, rating: 4.5, diningOption: 'Dine-in' },
-  { id: 6, name: 'Lahore Grill (sample)', cuisine: 'Pakistani', city: 'Lewiston', state: 'ID', price: 1, rating: 4.0, diningOption: 'Carryout' },
-  { id: 7, name: 'Trattoria Verde (sample)', cuisine: 'Italian', city: 'Moscow', state: 'ID', price: 3, rating: 4.5, diningOption: 'Dine-in' },
-  { id: 8, name: 'Bella Napoli (sample)', cuisine: 'Italian', city: 'Spokane', state: 'WA', price: 3, rating: 5.0, diningOption: 'Dine-in and carryout' },
+  { id: 1, name: 'Pho Corner (sample)', cuisine: 'Vietnamese', city: 'New York', state: 'NY', price: 1, rating: 4.0, diningOption: 'Carryout' },
+  { id: 2, name: 'Seoul Kitchen (sample)', cuisine: 'Korean', city: 'New York', state: 'NY', price: 2, rating: 4.5, diningOption: 'Dine-in and carryout' },
+  { id: 3, name: 'Saigon Table (sample)', cuisine: 'Vietnamese', city: 'Moscow', state: 'ID', price: 2, rating: 5.0, diningOption: 'Dine-in and carryout' },
+  { id: 4, name: 'Golden Wok (sample)', cuisine: 'Chinese', city: 'New York', state: 'NY', price: 2, rating: 4.0, diningOption: 'Dine-in' },
+  { id: 5, name: 'Spice Route (sample)', cuisine: 'Indian', city: 'Lewiston', state: 'ID', price: 2, rating: 4.5, diningOption: 'Dine-in' },
+  { id: 6, name: 'Lahore Grill (sample)', cuisine: 'Pakistani', city: 'New York', state: 'NY', price: 1, rating: 4.0, diningOption: 'Carryout' },
+  { id: 7, name: 'Trattoria Verde (sample)', cuisine: 'Italian', city: 'New York', state: 'NY', price: 3, rating: 4.5, diningOption: 'Dine-in' },
+  { id: 8, name: 'Bella Napoli (sample)', cuisine: 'Italian', city: 'Boise', state: 'ID', price: 3, rating: 5.0, diningOption: 'Dine-in and carryout' },
 ];
+
+export async function mockGetOptions() {
+  return { cuisines: FALLBACK_CUISINES, cities: FALLBACK_CITIES };
+}
 
 // Reasons why a restaurant differs from the search. Empty list = exact match.
 function differences(r, c) {
