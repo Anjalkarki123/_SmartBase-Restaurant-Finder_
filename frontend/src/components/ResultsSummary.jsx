@@ -15,7 +15,7 @@ export default function ResultsSummary({ criteria, results }) {
       <dl className="criteria">
         <div><dt>Cuisine</dt><dd>{criteria.cuisine}</dd></div>
         <div><dt>City</dt><dd>{criteria.city}, {criteria.state}</dd></div>
-        <div><dt>Max price</dt><dd>{criteria.maxPrice === '' ? 'Any' : formatPrice(criteria.maxPrice)}</dd></div>
+        <div><dt>Max price</dt><dd>{criteria.maxPrice === '' ? 'Any price' : formatPrice(criteria.maxPrice)}</dd></div>
         <div><dt>Min rating</dt><dd>{formatRating(criteria.minRating)}</dd></div>
       </dl>
       <p className="count">{countText}</p>
