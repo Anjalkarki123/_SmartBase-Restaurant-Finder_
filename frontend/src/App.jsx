@@ -4,8 +4,7 @@ import SearchForm from './components/SearchForm.jsx';
 import ResultsSummary from './components/ResultsSummary.jsx';
 import ResultsList from './components/ResultsList.jsx';
 import StatusPanel from './components/StatusPanel.jsx';
-import HowItWorks from './components/HowItWorks.jsx';
-import { getOptions, searchRestaurants, USE_MOCK } from './services/api.js';
+import { getOptions, searchRestaurants } from './services/api.js';
 import { FALLBACK_CITIES, FALLBACK_CUISINES } from './config.js';
 
 /*
@@ -75,7 +74,6 @@ export default function App() {
             Search by cuisine, city, price, and rating. When no restaurant fits every choice,
             SmartBase suggests the nearest options and tells you why.
           </p>
-          {USE_MOCK && <p className="demo-banner">Demo mode: showing sample restaurants, not real data.</p>}
         </section>
 
         <SearchForm
@@ -87,40 +85,37 @@ export default function App() {
           onReset={resetSearch}
         />
 
-        <section className="results-area" aria-labelledby="results-heading">
-          <h2 id="results-heading" className="visually-hidden">Results</h2>
+        {status !== 'idle' && (
+          <section className="results-area" aria-labelledby="results-heading">
+            <h2 id="results-heading" className="visually-hidden">Results</h2>
 
-          {status === 'idle' && <HowItWorks />}
+            {status === 'loading' && (
+              <StatusPanel title="Searching restaurants…" loading />
+            )}
 
-          {status === 'loading' && (
-            <StatusPanel title="Searching restaurants…" loading />
-          )}
+            {status === 'error' && (
+              <StatusPanel title="The search didn't finish" tone="error"
+                action={{ label: 'Retry', onClick: () => runSearch(criteria) }}>
+                {errorMessage}
+              </StatusPanel>
+            )}
 
-          {status === 'error' && (
-            <StatusPanel title="The search didn't finish" tone="error"
-              action={{ label: 'Retry', onClick: () => runSearch(criteria) }}>
-              {errorMessage}
-            </StatusPanel>
-          )}
-
-          {status === 'success' && (
-            <>
-              <ResultsSummary criteria={criteria} results={results} />
-              {results.length === 0 ? (
-                <StatusPanel title="No restaurants found">
-                  Nothing matched or came close to this search. Try a different cuisine or
-                  city, a higher maximum price, or a lower minimum rating.
-                </StatusPanel>
-              ) : (
-                <ResultsList results={results} />
-              )}
-            </>
-          )}
-        </section>
+            {status === 'success' && (
+              <>
+                <ResultsSummary criteria={criteria} results={results} />
+                {results.length === 0 ? (
+                  <StatusPanel title="No restaurants found">
+                    Nothing matched or came close to this search. Try a different cuisine or
+                    city, a higher maximum price, or a lower minimum rating.
+                  </StatusPanel>
+                ) : (
+                  <ResultsList results={results} />
+                )}
+              </>
+            )}
+          </section>
+        )}
       </main>
-      <footer className="footer">
-        <div className="container">SmartBase, CS 360 Database Systems, University of Idaho</div>
-      </footer>
     </>
   );
 }

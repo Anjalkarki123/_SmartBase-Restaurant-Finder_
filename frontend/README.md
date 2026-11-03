@@ -13,21 +13,13 @@ Open http://localhost:5180
 
 ## Demo mode
 
-`USE_MOCK = true` in `src/services/api.js` uses sample restaurants from `src/services/mockApi.js`.
-
-| Try | Result |
-|---|---|
-| Vietnamese, Pullman, WA | An exact match, plus alternatives |
-| Vietnamese, Moscow, ID, min rating 4.5 | Alternatives only, each with reasons |
-| Mexican, any city | No restaurants found |
-
-Set `SIMULATE_ERROR = true` in `mockApi.js` to test the error message and Retry button.
+`USE_MOCK = true` in `src/services/api.js` uses demo restaurants from `src/services/mockApi.js`.
 
 ## Connect to the Flask backend
 
 1. Start Flask on port 5000 (Vite forwards `/api` there, see `vite.config.js`).
 2. Set `USE_MOCK = false` in `src/services/api.js`.
-3. The backend must follow `../API_CONTRACT.md`: each result has `id`, `name`, `cuisine`, `city`,
+3. The backend must return results with `id`, `name`, `cuisine`, `city`,
    `price`, `rating`, `exact` (true/false), `reasons` (list), and optionally `state` and `diningOption`.
 
 ## Structure
@@ -36,15 +28,14 @@ Set `SIMULATE_ERROR = true` in `mockApi.js` to test the error message and Retry 
 src/
 ├── main.jsx             starts React
 ├── App.jsx              page state: idle, loading, success, error
-├── config.js            price units, dropdown lists, formatting
-├── styles.css           all styles (colors at the top)
-├── services/
-│   ├── api.js           the only code that talks to the backend
-│   └── mockApi.js       sample data for demos
-└── components/
+    ├── config.js            price units, dropdown lists, formatting
+    ├── styles.css           all styles (colors at the top)
+    ├── services/
+    │   ├── api.js           the only code that talks to the backend
+    │   └── mockApi.js       demo options and restaurant data
+    └── components/
     ├── Header.jsx          logo and app name
-    ├── HowItWorks.jsx      3-step explanation before the first search
-    ├── SearchForm.jsx   fields, validation, Search and Reset
+        ├── SearchForm.jsx   fields, validation, Search and Reset
     ├── ResultsSummary.jsx
     ├── ResultsList.jsx
     ├── RestaurantCard.jsx
