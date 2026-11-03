@@ -1,0 +1,18 @@
+// Get all the different types of cuisine
+SELECT name FROM cuisine;
+
+// Get all the cities
+SELECT name FROM city;
+
+// Get all resturants in Brooklyn that serve American food, have a moderate or lower price, and have a rating of at least 3
+// This covers all the search criteria in the current fronted, we can add more later
+SELECT restaurant.name
+FROM restaurant
+INNER JOIN cuisine
+ON restaurant.cuisine_id = cuisine.cuisine_id
+INNER JOIN city
+ON restaurant.city_id = city.city_id
+WHERE city.name = 'Brooklyn'
+AND cuisine.name = 'American'
+AND (price = 'Moderate' OR price = 'Low')
+AND rating > 2;
