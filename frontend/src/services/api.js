@@ -2,17 +2,50 @@
  * All communication with the Flask backend goes through this file.
  * Components never call fetch() directly.
  */
-import { mockSearchRestaurants } from './mockApi.js';
+import { mockGetOptions, mockSearchRestaurants } from './mockApi.js';
 
 // ---------------------------------------------------------------------------
 // THE SWITCH: true = use demo data, false = call the real Flask backend.
 // ---------------------------------------------------------------------------
 export const USE_MOCK = true;
 
+let optionsRequest;
+
 // Address of the Flask server. Leave empty during development: Vite forwards
 // every /api request to http://localhost:5000 (see vite.config.js).
 // For the hosted site, create a .env file with: VITE_API_URL=https://your-backend-url
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+
+/**
+ * Load cuisines and cities for the search form.
+ * The cached promise prevents duplicate requests during React Strict Mode setup.
+ */
+export function getOptions() {
+  if (!optionsRequest) {
+    if (USE_MOCK) {
+      optionsRequest = mockGetOptions();
+    } else {
+      optionsRequest = fetch(`${API_BASE_URL}/api/options`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`The server could not load search options (error ${response.status}).`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          const validCuisines = Array.isArray(data?.cuisines)
+            && data.cuisines.every((cuisine) => typeof cuisine === 'string');
+          const validCities = Array.isArray(data?.cities)
+            && data.cities.every((city) => typeof city?.city === 'string' && typeof city?.state === 'string');
+          if (!validCuisines || !validCities) {
+            throw new Error('The server sent unexpected search options.');
+          }
+          return data;
+        });
+    }
+  }
+  return optionsRequest;
+}
 
 /**
  * Search for restaurants.
@@ -31,7 +64,7 @@ export async function searchRestaurants(criteria) {
     city: criteria.city,
     minRating: criteria.minRating,
   });
-  if (criteria.maxPrice !== '') params.append('maxPrice', criteria.maxPrice);
+  if (criteria.maxPrice !== '') params.set('maxPrice', String(Number(criteria.maxPrice)));
 
   let response;
   try {

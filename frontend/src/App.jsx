@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from './components/Header.jsx';
 import SearchForm from './components/SearchForm.jsx';
 import ResultsSummary from './components/ResultsSummary.jsx';
 import ResultsList from './components/ResultsList.jsx';
 import StatusPanel from './components/StatusPanel.jsx';
 import HowItWorks from './components/HowItWorks.jsx';
-import { searchRestaurants, USE_MOCK } from './services/api.js';
+import { getOptions, searchRestaurants, USE_MOCK } from './services/api.js';
+import { FALLBACK_CITIES, FALLBACK_CUISINES } from './config.js';
 
 /*
  * App holds the page state:
@@ -14,10 +15,33 @@ import { searchRestaurants, USE_MOCK } from './services/api.js';
  *   results  the list returned by the backend, kept in the backend's order
  */
 export default function App() {
+  const [options, setOptions] = useState({ cuisines: [], cities: [] });
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [optionsError, setOptionsError] = useState(false);
   const [status, setStatus] = useState('idle');
   const [criteria, setCriteria] = useState(null);
   const [results, setResults] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    getOptions()
+      .then((loadedOptions) => {
+        if (active) setOptions(loadedOptions);
+      })
+      .catch(() => {
+        if (!active) return;
+        setOptions({ cuisines: FALLBACK_CUISINES, cities: FALLBACK_CITIES });
+        setOptionsError(true);
+      })
+      .finally(() => {
+        if (active) setOptionsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function runSearch(searchCriteria) {
     if (status === 'loading') return; // ignore duplicate submissions
@@ -54,7 +78,14 @@ export default function App() {
           {USE_MOCK && <p className="demo-banner">Demo mode: showing sample restaurants, not real data.</p>}
         </section>
 
-        <SearchForm loading={status === 'loading'} onSearch={runSearch} onReset={resetSearch} />
+        <SearchForm
+          loading={status === 'loading'}
+          options={options}
+          optionsLoading={optionsLoading}
+          optionsError={optionsError}
+          onSearch={runSearch}
+          onReset={resetSearch}
+        />
 
         <section className="results-area" aria-labelledby="results-heading">
           <h2 id="results-heading" className="visually-hidden">Results</h2>
