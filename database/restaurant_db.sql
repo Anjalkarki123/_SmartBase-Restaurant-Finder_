@@ -562,8 +562,8 @@ ALTER TABLE `city`
 -- Indexes for table `cuisine`
 --
 ALTER TABLE `cuisine`
-  ADD PRIMARY KEY (`cuisine_id`),
-  ADD KEY `parent_id` (`parent_id`);
+   ADD PRIMARY KEY (`cuisine_id`),
+   ADD KEY `parent_id` (`parent_id`);
 
 --
 -- Indexes for table `restaurant`
@@ -596,8 +596,8 @@ ALTER TABLE `cuisine`
 --
 -- Constraints for table `cuisine`
 --
-ALTER TABLE `cuisine`
-  ADD CONSTRAINT `cuisine_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `cuisine` (`cuisine_id`);
+-- ALTER TABLE `cuisine`
+--   ADD CONSTRAINT `cuisine_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `cuisine` (`cuisine_id`);
 
 --
 -- Constraints for table `restaurant`

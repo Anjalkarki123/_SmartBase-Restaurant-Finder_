@@ -7,7 +7,7 @@ import { mockGetOptions, mockSearchRestaurants } from './mockApi.js';
 // ---------------------------------------------------------------------------
 // THE SWITCH: true = use demo data, false = call the real Flask backend.
 // ---------------------------------------------------------------------------
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 let optionsRequest;
 

@@ -8,7 +8,16 @@ export default defineConfig({
     strictPort: true,  // stop with an error if 5180 is busy (instead of switching ports)
     open: true,        // open the browser automatically
     proxy: {
-      '/api': 'http://localhost:5000', // forward API calls to the Flask backend
+      '/api': { // forward API calls to the Flask backend
+         target: 'http://localhost:5000',
+         changeOrigin: true,
+         rewrite: (path) => {
+            if(path.startsWith('/api/')) {
+               return path.slice(4);
+            }
+            return path;
+         }
+      } 
     },
   },
 });
