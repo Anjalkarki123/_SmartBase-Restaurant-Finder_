@@ -1,0 +1,4 @@
+flask
+pymysql
+google-auth
+requests

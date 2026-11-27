@@ -4,16 +4,24 @@ import SearchForm from './components/SearchForm.jsx';
 import ResultsSummary from './components/ResultsSummary.jsx';
 import ResultsList from './components/ResultsList.jsx';
 import StatusPanel from './components/StatusPanel.jsx';
+import LoginPage from './components/LoginPage.jsx';
 import { getOptions, searchRestaurants } from './services/api.js';
+import { getCurrentUser, signOut } from './services/auth.js';
 import { FALLBACK_CITIES, FALLBACK_CUISINES } from './config.js';
 
 /*
  * App holds the page state:
- *   status   'idle' (before any search) | 'loading' | 'success' | 'error'
- *   criteria the last search the user ran (used for the summary and Retry)
- *   results  the list returned by the backend, kept in the backend's order
+ *   user         the signed-in Google user, or null
+ *   authChecked  false until we know whether someone is already signed in
+ *   status       'idle' | 'loading' | 'success' | 'error' for the search
+ *   criteria     the last search the user ran
+ *   results      the list returned by the backend, in the backend's order
+ *
+ * The app opens on the sign-in page. The search page is shown only after sign-in.
  */
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [options, setOptions] = useState({ cuisines: [], cities: [] });
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [optionsError, setOptionsError] = useState(false);
@@ -22,8 +30,24 @@ export default function App() {
   const [results, setResults] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // On start, ask the backend if someone is already signed in (session cookie).
   useEffect(() => {
     let active = true;
+    getCurrentUser().then((currentUser) => {
+      if (!active) return;
+      setUser(currentUser);
+      setAuthChecked(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Load cuisines and cities once the user is signed in.
+  useEffect(() => {
+    if (!user) return undefined;
+    let active = true;
+    setOptionsLoading(true);
     getOptions()
       .then((loadedOptions) => {
         if (active) setOptions(loadedOptions);
@@ -40,7 +64,13 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [user]);
+
+  async function handleSignOut() {
+    await signOut();
+    setUser(null);
+    resetSearch();
+  }
 
   async function runSearch(searchCriteria) {
     if (status === 'loading') return; // ignore duplicate submissions
@@ -64,9 +94,32 @@ export default function App() {
     setErrorMessage('');
   }
 
+  // 1. Still checking whether someone is signed in.
+  if (!authChecked) {
+    return (
+      <>
+        <Header />
+        <main className="container page">
+          <StatusPanel title="Loading SmartBase…" loading />
+        </main>
+      </>
+    );
+  }
+
+  // 2. Nobody signed in: show the sign-in page first.
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <LoginPage onSignedIn={setUser} />
+      </>
+    );
+  }
+
+  // 3. Signed in: show the search page.
   return (
     <>
-      <Header />
+      <Header user={user} onSignOut={handleSignOut} />
       <main className="container page">
         <section className="intro">
           <h1>Find the closest restaurant, even when nothing matches exactly.</h1>

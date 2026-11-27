@@ -144,3 +144,30 @@ h1, h2, h3, p, dl, dd { margin: 0; }
   .form-actions .button { flex: 1; }
   .card { padding: 18px; }
 }
+/* ---------- Header account area and sign-in page ---------- */
+.header-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand-link { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.brand-text { display: flex; flex-direction: column; }
+.account { display: flex; align-items: center; gap: 12px; flex: none; }
+.button-small { min-height: 40px; padding: 0 16px; font-size: 15px; }
+.user-chip { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; }
+.avatar-fallback { display: flex; align-items: center; justify-content: center; background: var(--green-light); color: var(--green-dark); font-weight: 700; }
+
+.login-card {
+  align-self: center; width: 100%; max-width: 460px; margin-top: 24px;
+  background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 32px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;
+}
+.login-text { display: flex; flex-direction: column; gap: 8px; }
+.login-text h1 { font-size: 26px; letter-spacing: -0.01em; }
+.login-text p { color: var(--muted); }
+.google-button { min-height: 44px; display: flex; justify-content: center; }
+.login-card .status { width: 100%; text-align: left; }
+.link-button { background: none; border: 0; padding: 4px; font: inherit; color: var(--green); font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+@media (max-width: 560px) {
+  .tagline { display: none; }
+  .user-name { display: none; }
+  .login-card { padding: 24px 20px; }
+}
