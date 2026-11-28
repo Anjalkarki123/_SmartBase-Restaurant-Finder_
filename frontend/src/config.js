@@ -16,6 +16,12 @@ export function formatRating(value) {
   return Number(value).toFixed(1);
 }
 
+// Dining options are stored as 'Both', 'Dine-in' or 'Takeout' in the database.
+export function formatDining(value) {
+  const labels = { both: 'Dine-in and takeout', 'dine-in': 'Dine-in only', takeout: 'Takeout only' };
+  return labels[String(value).trim().toLowerCase()] ?? value;
+}
+
 export const FALLBACK_CUISINES = [
   'Vietnamese', 'Korean', 'Chinese', 'Indian', 'Pakistani', 'Italian', 'Mexican',
 ];
