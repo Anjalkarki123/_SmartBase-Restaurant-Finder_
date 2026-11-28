@@ -26,13 +26,13 @@ export default function LoginPage({ onSignedIn }) {
   }
 
   return (
-    <main className="container page">
+    <main className="container page login-page">
       <section className="login-card" aria-labelledby="login-heading">
         <div className="login-text">
           <h1 id="login-heading">Sign in to SmartBase</h1>
           <p>
-            Sign in with your Google account to start finding restaurants. SmartBase never
-            sees your password.
+            Find the closest restaurant, even when nothing matches exactly. Sign in with your
+            Google account to start. SmartBase never sees your password.
           </p>
         </div>
 

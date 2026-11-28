@@ -1,13 +1,14 @@
 import os
-
 import pymysql 
 from flask import Flask, jsonify, request
 
 from auth import auth
+from saved import saved
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "smartbase-dev-only-secret")
 app.register_blueprint(auth)
+app.register_blueprint(saved)
 @app.route("/search", methods=["GET"])
 def get_restaurants():
    cuisine = request.args.get("cuisine")

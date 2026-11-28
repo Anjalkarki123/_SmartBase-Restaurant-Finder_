@@ -5,7 +5,6 @@ GET  /auth/me      who is signed in
 POST /auth/logout  sign out
 """
 import os
-
 import pymysql
 from flask import Blueprint, jsonify, request, session
 from google.auth.transport import requests as google_requests
